@@ -19,14 +19,16 @@ LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POS
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
-const int kOneWireBusPin = 2; // Data wire is plugged into port 2 on the Arduino
+const int kOneWireBusPin = 2; // Data wire of the thermometer
 
 OneWire oneWire(kOneWireBusPin);     // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 DallasTemperature sensors(&oneWire); // Pass our oneWire reference to Dallas Temperature.
 DeviceAddress enclosureThermometer;  // arrays to hold device address
 
 // Fans
-const int kfanPWMPin = 5;
+const int kFanPWMPin = 5;
+const int kPwmFrequency = 25000; // PWM Frequency: Target frequency 25 kHz, acceptable operational range 21 kHz to 28 kHz 
+const int kPwmResolution = 8; // 2^kPwmResolution = Resolution steps. 2^8 = 255
 
 void lcdSetup()
 {
@@ -72,7 +74,7 @@ void tempSensorSetup()
   else
     Serial.println("OFF");
 
-  // Assign address manually. The addresses below will beed to be changed
+  // Assign address manually. The addresses below will need to be changed
   // to valid device addresses on your bus. Device address can be retrieved
   // by using either oneWire.search(deviceAddress) or individually via
   // sensors.getAddress(deviceAddress, index)
@@ -112,9 +114,10 @@ void tempSensorSetup()
   Serial.println();
 }
 
-void pwmSetup(){
-  ledcAttachPin(5, 0);
-  ledcSetup(0, 25000, 8);
+void pwmSetup()
+{
+  ledcAttachPin(kFanPWMPin, 0);
+  ledcSetup(0, kPwmFrequency, kPwmResolution);
 }
 
 void setup()
@@ -138,6 +141,6 @@ void setup()
 void loop()
 {
 
-  ledcWrite(kfanPWMPin, 100);
+  ledcWrite(kFanPWMPin, 100);
   // put your main code here, to run repeatedly:
 }
